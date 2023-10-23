@@ -1,0 +1,293 @@
+/*
+SPD 1-E
+Profesores: Dario Cuda
+            Esteban Quiroz
+Alumno:     Nicolás Larrochi            
+
+Parcial domiciliario - Sistemas de procesamiento de datos 
+Parte 4: Modificación según el Último Número de Documento
+
+Modifica el proyecto de la Parte 3 de la siguiente manera: 
+1. Considerando el último número de tu número de documento 
+(DNI o documento de identidad), 
+modifica una funcionalidad del proyecto.
+
+-Si tu número de documento termina en (0-3) deberás implementar 
+a tu proyecto que el interruptor deslizante de la parte dos 
+tenga la función de encender y apagar el sistema,
+solo mostrando el contador.
+
+
+*/
+
+#define B 13
+#define A 12
+#define F 11
+#define G 10
+#define E 9
+#define D 8
+#define C 7
+#define UNIDAD A4
+#define DECENA A5
+#define SWITCH 5
+#define NEGATIVO 6
+#define POSITIVO 2
+#define SUMA 4
+#define RESTA 3
+#define APAGADOS 0
+#define FUERZA A0
+#define FOTORESISTENCIA A1
+
+int countDigit = 0; // Contador
+int sube = 1;       // Pulsadores constantes
+int subio = 1;
+int baja = 1;
+int bajo = 1;
+
+int lecturaFuerza;  
+int lecturaFotoresistencia;
+
+void setup()
+{
+  
+  pinMode(B, OUTPUT);
+  pinMode(A, OUTPUT);
+  pinMode(F, OUTPUT);
+  pinMode(G, OUTPUT);
+  pinMode(E, OUTPUT);
+  pinMode(D, OUTPUT);
+  pinMode(C, OUTPUT);
+  pinMode(SWITCH, INPUT_PULLUP); // Apagado o Prendido el Contador
+  pinMode(SUMA,INPUT_PULLUP); // Suma
+  pinMode(RESTA,INPUT_PULLUP); // Resta
+  pinMode(UNIDAD, OUTPUT);
+  pinMode(DECENA, OUTPUT);
+  pinMode(NEGATIVO, OUTPUT); // Motor de aficionado
+  pinMode(POSITIVO, OUTPUT);
+  pinMode(FUERZA, INPUT); // Sensor de Fuerza
+  pinMode(FOTORESISTENCIA, INPUT); // Fotoresistencia
+
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  int pressed = keypressed(); // tecla presionada
+  
+  if (digitalRead(SWITCH) == HIGH) // Si se presiona el Switch, enciende
+  {                                // enciende el contador
+                                   // y el sensor de fuerza se activa
+                                   // y dirige si el motor enciende o no segun sus valores      
+    
+     if (pressed == SUMA) // Si se presiona suma,
+     {                    // sumará 1 al contador
+       countDigit++;
+       if (countDigit > 99)
+       {
+         countDigit = 0;  // Si ese contador está en 99 y suma
+       }                  // retornará 0  
+     }
+     else if (pressed == RESTA) // Si se presiona resta, 
+     {                          // Restará 1 al contador 
+         countDigit--;  
+         if(countDigit < 0)
+         {
+            countDigit = 99;   // Si ese contador está en 0 y resta
+         }                     // retornará 99
+     } 
+    
+    printCount(countDigit); // Muestra el conteo
+     
+    lecturaFuerza = analogRead(FUERZA); // Lectura del sensor
+    Serial.println(lecturaFuerza); // Muestra los valores de Fuerza
+    delay(10);  
+    
+    analogWrite(POSITIVO, lecturaFuerza); // de 0 a 120  = 0 -30  | El motor en movimiento contrario 
+                                   // de 130 a 466  = | El motor en reposo
+    digitalWrite(NEGATIVO, HIGH);  // Gira lado contrario
+    
+  }
+   
+  else  // Si el switch no se presiona, solo muestra los valores
+        // de la fotoresistencia.
+        // El motor gira según los valores de la fotoresistencia.
+       
+  {
+     prendeDigito(APAGADOS); // Apaga displays    
+    
+     lecturaFotoresistencia = analogRead(FOTORESISTENCIA); // Lectura
+     Serial.println(lecturaFotoresistencia); // Muestra
+     delay(10); 
+                                                    // Valor de lectura de Fotoresistencia   
+     analogWrite(POSITIVO, lecturaFotoresistencia); // de 6 a 118 = 0 | Motor en reposo
+                                                    // de 158 a 679 = +30  | Motor en movimiento 
+     digitalWrite(NEGATIVO, LOW);  // Gira en positivo
+  }
+  
+  
+}  
+
+int keypressed(void) 
+{
+  sube = digitalRead(SUMA);  // Lee estado de los botones
+  baja = digitalRead(RESTA);
+  
+  
+  if(sube)  // Botones sin presionar
+  {
+    subio = 1; // Tampoco estaban presionados
+  }
+  if(baja)
+  {
+    bajo = 1;
+  }
+  
+ 
+  if (sube == 0 && sube != subio) // Si se presiona boton
+  {
+    subio = sube;                 // Igualo el estado
+    return SUMA;                  // Retorna el Estado del boton  
+  }
+  
+  if (baja == 0 && baja != bajo)
+  {
+    bajo = baja;
+    return RESTA;
+  }
+  
+ 
+  
+  return 0; // Si no se presionó ningun boton o ya estaba
+            // presionada.
+}
+  
+  
+  
+void printCount(int count) // Imprime el num obtenido del contador
+                           // Utilización de multiplexación para que muestre ambos displays
+{
+  prendeDigito(APAGADOS);  // Apaga todos
+  printDigit(count/10);  // Toma el valor de la decena 
+  prendeDigito(DECENA);  // Prende display decena
+  prendeDigito(APAGADOS); // Apaga todos
+  printDigit(count - 10 * ((int)count/10)); // Toma el valor de la unidad
+  prendeDigito(UNIDAD); // Prende display unidad          
+}  
+  
+
+void prendeDigito (int digito)
+{
+  if (digito == UNIDAD)
+  {
+    digitalWrite(UNIDAD, LOW);  //  unidad = 0 (Prende)
+    digitalWrite(DECENA, HIGH); //  decena = 1 (Apaga)
+    delay(10);
+  }
+  else if (digito == DECENA)
+  {
+    digitalWrite(UNIDAD, HIGH); // unidad = 1 (Apaga)
+    digitalWrite(DECENA, LOW);  // decena = 0 (Prende)
+    delay(10);
+  }
+  else
+  {
+    digitalWrite(UNIDAD, HIGH);  // Ambos se apagan
+    digitalWrite(DECENA, HIGH);
+  }
+}  
+    
+void printDigit(int digit)  // Dibuja el numero en el display de 7Segmentos
+{
+    switch (digit) {
+        case 0:
+            digitalWrite(A, HIGH);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, HIGH);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, LOW);
+         break;
+         case 1:
+            digitalWrite(A, LOW);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, LOW);
+            digitalWrite(E, LOW);
+            digitalWrite(F, LOW);
+            digitalWrite(G, LOW);
+         break;
+         case 2:
+            digitalWrite(A, HIGH);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, LOW);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, HIGH);
+            digitalWrite(F, LOW);
+            digitalWrite(G, HIGH);
+         break;
+         case 3:
+            digitalWrite(A, HIGH);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, LOW);
+            digitalWrite(F, LOW);
+            digitalWrite(G, HIGH);
+         break;
+         case 4:
+            digitalWrite(A, LOW);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, LOW);
+            digitalWrite(E, LOW);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, HIGH);
+         break;
+         case 5:
+            digitalWrite(A, HIGH);
+            digitalWrite(B, LOW);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, LOW);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, HIGH);
+         break;
+         case 6:
+            digitalWrite(A, HIGH);
+            digitalWrite(B, LOW);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, HIGH);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, HIGH);
+         break;
+         case 7:
+            digitalWrite(A, HIGH);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, LOW);
+            digitalWrite(E, LOW);
+            digitalWrite(F, LOW);
+            digitalWrite(G, LOW);
+         break;
+         case 8:
+            digitalWrite(A, HIGH);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, HIGH);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, HIGH);
+         break;
+         case 9:
+            digitalWrite(A, HIGH);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, LOW);
+            digitalWrite(E, LOW);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, HIGH);
+         break;
+    }
+}
