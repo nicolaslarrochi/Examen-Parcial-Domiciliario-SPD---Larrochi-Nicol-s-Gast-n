@@ -74,54 +74,60 @@ void loop()
 {
   int pressed = keypressed(); // tecla presionada
   
-  if (digitalRead(SWITCH) == HIGH) // Si se presiona el Switch, enciende
+  if (digitalRead(SWITCH) == HIGH) // Si se presiona el Switch, enciende el sistema
   {                                // enciende el contador
-                                   // y el sensor de fuerza se activa
-                                   // y dirige si el motor enciende o no segun sus valores      
-    
+                                   
      if (pressed == SUMA) // Si se presiona suma,
      {                    // sumará 1 al contador
+                          // Por cada vez, la fotoresistencia se activa y muestra valores
+                          // y dirige si el motor enciende o no segun sus valores      
+         
        countDigit++;
        if (countDigit > 99)
        {
          countDigit = 0;  // Si ese contador está en 99 y suma
        }                  // retornará 0  
+       
+        // Esto muestra los valores de la fotoresistencia.
+        // El motor gira según los valores de la fotoresistencia.
+        lecturaFotoresistencia = analogRead(FOTORESISTENCIA); // Lectura
+        Serial.println(lecturaFotoresistencia); // Muestra
+        delay(10); 
+                                                    // Valor de lectura de Fotoresistencia   
+        analogWrite(POSITIVO, lecturaFotoresistencia); // de 6 a 118 = 0 | Motor en reposo
+                                                    // de 158 a 679 = +30  | Motor en movimiento 
+        digitalWrite(NEGATIVO, LOW);  // Gira en positivo
      }
      else if (pressed == RESTA) // Si se presiona resta, 
-     {                          // Restará 1 al contador 
+     {                          // Restará 1 al contador
+                                // Por cada vez , El sensor de fuerza se activa y muestra valores
+                                // dependiendo de esos valores el motor se mueve o queda en reposo
          countDigit--;  
          if(countDigit < 0)
          {
             countDigit = 99;   // Si ese contador está en 0 y resta
          }                     // retornará 99
+       
+       lecturaFuerza = analogRead(FUERZA); // Lectura del sensor
+       Serial.println(lecturaFuerza); // Muestra los valores de Fuerza
+       delay(10);  
+    
+       analogWrite(POSITIVO, lecturaFuerza); // de 0 a 120  = 0 -30  | El motor en movimiento contrario 
+                                   // de 130 a 466  = | El motor en reposo
+       digitalWrite(NEGATIVO, HIGH);  // Gira lado contrario
      } 
     
     printCount(countDigit); // Muestra el conteo
      
-    lecturaFuerza = analogRead(FUERZA); // Lectura del sensor
-    Serial.println(lecturaFuerza); // Muestra los valores de Fuerza
-    delay(10);  
     
-    analogWrite(POSITIVO, lecturaFuerza); // de 0 a 120  = 0 -30  | El motor en movimiento contrario 
-                                   // de 130 a 466  = | El motor en reposo
-    digitalWrite(NEGATIVO, HIGH);  // Gira lado contrario
     
   }
    
-  else  // Si el switch no se presiona, solo muestra los valores
-        // de la fotoresistencia.
-        // El motor gira según los valores de la fotoresistencia.
+  else  // Si no se pulsa nada el sistema se mantiene apagado.
        
   {
      prendeDigito(APAGADOS); // Apaga displays    
     
-     lecturaFotoresistencia = analogRead(FOTORESISTENCIA); // Lectura
-     Serial.println(lecturaFotoresistencia); // Muestra
-     delay(10); 
-                                                    // Valor de lectura de Fotoresistencia   
-     analogWrite(POSITIVO, lecturaFotoresistencia); // de 6 a 118 = 0 | Motor en reposo
-                                                    // de 158 a 679 = +30  | Motor en movimiento 
-     digitalWrite(NEGATIVO, LOW);  // Gira en positivo
   }
   
   
