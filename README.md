@@ -32,4 +32,4 @@ solo mostrando el contador.
 
 ## Link al proyecto
 
-- [Tinkercad - Parte 1]()
+- [Tinkercad - Parte 1](https://www.tinkercad.com/things/cHaGmhaJGJR)
