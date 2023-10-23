@@ -11,7 +11,7 @@
 ## **Parcial domiciliario - Sistemas de procesamiento de datos** 
 Parte 4: Modificación según el Último Número de Documento**
 
-![Tinkercad](./Img)
+![Tinkercad](./Img/Examen%20Parcial%20Domiciliario_1-E%20%20Larrochi%20Nicol%C3%A1s%20Gast%C3%B3n%20.png)
 
 ## Descripción
 
