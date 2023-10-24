@@ -61,4 +61,4 @@ Este fragmento de código muestra como es que interactuan todos los dispositivos
 
 ## Link al proyecto
 
-- [Tinkercad - Parte 1](https://www.tinkercad.com/things/cHaGmhaJGJR)
+- [Tinkercad - Parte 1](https://www.tinkercad.com/things/3UCET73Uz3D?sharecode=dRo9h-2r8whEn3wHlxGuQXKODZa-6y3vl2WbbPKIlo4)
